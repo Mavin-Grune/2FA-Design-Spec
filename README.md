@@ -1,4 +1,4 @@
-# 2FA Design Spec
+# 2FA Design Spec Using obra/superpowers
 
 **Date:** 2026-03-11
 **Project:** nextjs15-starter-kit (Next.js 15 + NestJS 11 monorepo)
