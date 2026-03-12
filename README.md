@@ -1,6 +1,6 @@
-# 2FA Design Spec & Implementation Plan
+# 2FA Design Spec, Plan & Implementation
 
-Designing a complete TOTP-based Two-Factor Authentication system for a **Next.js 15 + NestJS 11** monorepo — from brainstorming to a 17-task implementation plan — using [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the [Superpowers](https://github.com/obra/superpowers) plugin.
+Designing and building a complete TOTP-based Two-Factor Authentication system for a **Next.js 15 + NestJS 11** monorepo — from brainstorming to a 17-task implementation plan to working code — using [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with the [Superpowers](https://github.com/obra/superpowers) plugin.
 
 ## What's Inside
 
@@ -8,6 +8,7 @@ Designing a complete TOTP-based Two-Factor Authentication system for a **Next.js
 |----------|-------------|
 | [Design Spec](docs/spec.md) | Full 2FA design — auth flow, database schema, API endpoints, frontend pages, security considerations |
 | [Implementation Plan](docs/plan.md) | 17-task plan across 3 chunks (backend foundation, backend endpoints, frontend) with exact code |
+| [Implementation Summary](docs/implementation.md) | Full implementation walkthrough — session-by-session progress, issues resolved, verification results |
 
 ## The Process
 
@@ -41,7 +42,37 @@ After the spec was approved, the **writing-plans skill** generated a detailed im
 
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** (CLI) — Anthropic's agentic coding tool
 - **[Superpowers](https://github.com/obra/superpowers)** — Claude Code plugin adding structured skills for brainstorming, planning, TDD, and more
-- **Skills used:** `brainstorming`, `writing-plans`, `code-reviewer` (parallel agents)
+- **Skills used:** `brainstorming`, `writing-plans`, `executing-plans`, `code-reviewer` (parallel agents)
+
+## Implementation
+
+The plan was executed across two Claude Code sessions using the `executing-plans` skill, which loaded the plan, tracked progress through a task checklist, and ran verifications at each checkpoint. All 17 tasks completed with 8/8 unit tests passing.
+
+**Session 1: Backend** — Tasks 1–10 (Chunks 1 & 2). Built the complete backend: AES encryption service, database schema + migration, PartialJwtGuard, auth repository, and all API endpoints. Hit an otplib v13 API breaking change at the end.
+
+**Session 2: Frontend + Fix** — Tasks 11–17 (Chunk 3). Fixed otplib v13 migration, then built the full frontend: NextAuth session handling, middleware redirects, 2FA verify page, 3-step setup wizard, i18n (JA/EN), and admin Reset 2FA with confirmation modal.
+
+### Implementation Screenshots
+
+**TOTP Verification Page** — 6-digit PinInput with auto-submit
+
+![2FA Verify - TOTP](screenshots/06-verify-totp.png)
+
+**Backup Code Entry** — Alternative recovery method
+
+![2FA Verify - Backup Code](screenshots/07-verify-backup.png)
+
+**Admin User Edit with Reset 2FA** — Orange outline button on user edit form
+
+![Admin Reset 2FA](screenshots/08-admin-reset-button.png)
+
+**Reset 2FA Confirmation Modal** — Warning dialog before resetting
+
+![Reset 2FA Modal](screenshots/09-reset-modal.png)
+
+### Issue Highlight: otplib v12 → v13
+
+The plan was written against otplib v12's API (`authenticator.generateSecret()`), but v13.3.0 was installed, which completely removed the `authenticator` object in favor of a functional API (`generateSecret()`, `verifySync()`). The plan review agents caught several issues pre-implementation, but library version breaks remain a risk. Resolution was straightforward: read the actual TypeScript declarations and migrate to the new API.
 
 ## Key Design Decisions
 
