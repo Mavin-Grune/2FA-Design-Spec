@@ -1,0 +1,90 @@
+flowchart TD
+    subgraph LEGEND["Legend"]
+        direction LR
+        L1["Spec = WHAT to build\nPages, user flows, UI,\nbusiness logic, API endpoints\n(created by /brainstorming)"]
+        L2["Plan = HOW to build it\nTDD steps, file paths,\ncode to write, commands to run\n(created by /writing-plans)"]
+    end
+
+    Start([Project Start]) --> P1
+
+    subgraph P1["Phase 1: DB Design (Superpower, loop per domain)"]
+        direction TB
+        DS["Select Domain Group\nAUTH | USER | ..."]
+        DS --> B1["/brainstorming\nDomain modeling\nEntities, relations, seeds"]
+        B1 --> W1["Spec output:\ndocs/superpowers/specs/\nYYYY-MM-DD-db-domain.md"]
+        W1 --> MoreD{More\ndomains?}
+        MoreD -->|"Yes"| DS
+        MoreD -->|"No"| ERD["Generate ERD\nfrom all domain specs"]
+    end
+
+    P1 --> P2
+
+    subgraph P2["Phase 2: Feature Specs (Superpower, loop per page)"]
+        direction TB
+        GS["Select Feature Group\nAUTH | USER | ..."]
+        GS --> PS["Select Page in Group"]
+        PS --> B2["/brainstorming\nPage design, user flows,\nUI components, business logic"]
+        B2 --> SP["Spec output:\ndocs/superpowers/specs/\nYYYY-MM-DD-group-page.md"]
+        SP --> MoreP{More\npages?}
+        MoreP -->|"Yes"| PS
+        MoreP -->|"No"| MoreG{More\ngroups?}
+        MoreG -->|"Yes"| GS
+        MoreG -->|"No"| DONE2["All specs done"]
+    end
+
+    P2 --> P3
+
+    subgraph P3["Phase 3: Spec Review (ECC)"]
+        direction TB
+        API["/api-design\nEndpoint consistency"] --> SEC1["/security-review\nAuth flows, input handling"]
+        SEC1 --> ADJ{Issues?}
+    end
+
+    ADJ -->|"Fix needed"| P2
+    ADJ -->|"OK"| P4
+
+    subgraph P4["Phase 4: Implementation (Superpower)"]
+        direction TB
+        G2["Select Feature Group"] --> WP["/writing-plans\nTDD implementation plan\nper group"]
+        WP --> EX["/executing-plans\nor /subagent-driven-development\n(built-in two-stage review)"]
+        EX --> More2{More\ngroups?}
+        More2 -->|Yes| G2
+    end
+
+    P4 --> P5
+
+    subgraph P5["Phase 5: Quality Gate (ECC)"]
+        direction TB
+        SEC2["/security-review\nCross-feature security scan"] --> PRE["/pre-commit-review\nDebug code, TODOs, unused code"]
+        PRE --> QA["/check-quality\nFormat, lint, type-check"]
+    end
+
+    P5 --> P6
+
+    subgraph P6["Phase 6: Code Review & PR"]
+        direction TB
+        CR["Create PR\ngh pr create"] --> RV{"Review\nresult?"}
+        RV -->|"Approved"| MG["Merge / Deploy"]
+        RV -->|"Issues found"| ISS["Create GitHub Issue\ngh issue create"]
+    end
+
+    ISS --> FIX
+    EXT["External\nBug reports,\nfeature requests"] --> FIX
+
+    subgraph FIX["Issue Fix Loop"]
+        direction TB
+        F1["Claude Code reads issue\ngh issue view"] --> F2["Fix code & commit"]
+        F2 --> F3["Push & update PR\ngit push"]
+    end
+
+    FIX --> P6
+
+    MG --> End([Done])
+
+    style P1 fill:#e3f2fd,stroke:#1565c0
+    style P2 fill:#fff3e0,stroke:#e65100
+    style P3 fill:#fce4ec,stroke:#c62828
+    style P4 fill:#e8f5e9,stroke:#2e7d32
+    style P5 fill:#f3e5f5,stroke:#6a1b9a
+    style P6 fill:#fff9c4,stroke:#f9a825
+    style FIX fill:#ffecb3,stroke:#ff8f00
